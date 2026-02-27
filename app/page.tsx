@@ -2245,22 +2245,9 @@ export default function Home() {
 
               <div className="flex-1 overflow-y-auto px-4 py-3">
                 <div className="mb-4 flex items-center gap-2 rounded-lg border border-white/12 bg-white/5 px-2.5 py-2">
-                  {viewer?.image ? (
-                    <Image
-                      src={viewer.image}
-                      alt={viewer.name ?? viewer.email ?? "Profile"}
-                      width={28}
-                      height={28}
-                      className="h-7 w-7 border border-white/20 object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-7 w-7 items-center justify-center border border-white/20 bg-white/10 text-[11px] font-semibold uppercase text-white/75">
-                      {(viewer?.name ?? viewer?.email ?? "U").trim().charAt(0).toUpperCase()}
-                    </div>
-                  )}
                   <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-white/52">USER</p>
                     <p className="truncate text-xs text-white/88">{viewer?.name ?? "Signed in"}</p>
-                    <p className="truncate text-[10px] text-white/50">{viewer?.email ?? ""}</p>
                   </div>
                   <button
                     type="button"
