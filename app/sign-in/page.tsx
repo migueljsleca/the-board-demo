@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
-import { auth, signIn } from "@/auth";
+import { signIn } from "@/auth";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_credentials: "Invalid username or password.",
+  created: "Account created. Please sign in.",
 };
 
 function readParam(params: Record<string, string | string[] | undefined>, key: string) {
@@ -14,13 +15,11 @@ function readParam(params: Record<string, string | string[] | undefined>, key: s
 }
 
 export default async function SignInPage({ searchParams }: { searchParams: SearchParams }) {
-  const session = await auth();
-  if (session?.user?.id) {
-    redirect("/");
-  }
   const params = await searchParams;
   const errorKey = readParam(params, "error");
+  const createdFlag = readParam(params, "created");
   const errorMessage = errorKey ? ERROR_MESSAGES[errorKey] ?? "Unable to sign in." : null;
+  const successMessage = createdFlag === "1" ? ERROR_MESSAGES.created : null;
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0b0d12] px-6 py-20 text-white">
@@ -29,6 +28,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
         <p className="mb-3 inline-flex border border-white/20 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-white/60">The Board v3</p>
         <h1 className="text-2xl font-semibold tracking-tight text-white">Sign in to your workspace</h1>
         <p className="mt-2 text-sm text-white/60">Use your username and password to access your private boards and cloud images.</p>
+        {successMessage ? <p className="mt-4 border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">{successMessage}</p> : null}
         {errorMessage ? <p className="mt-4 border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">{errorMessage}</p> : null}
 
         <form

@@ -13,13 +13,6 @@ export default async function middleware(request: NextRequest) {
   const isAuthenticated = Boolean(token?.appUserId ?? token?.sub);
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/sign-in" || pathname === "/sign-up") {
-    if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-    return NextResponse.next();
-  }
-
   if (pathname.startsWith("/api/images") || pathname.startsWith("/api/folders")) {
     if (!isAuthenticated) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

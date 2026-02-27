@@ -1,6 +1,4 @@
 import { redirect } from "next/navigation";
-import { AuthError } from "next-auth";
-import { auth, signIn } from "@/auth";
 import { createLocalUser } from "@/lib/database";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -20,11 +18,6 @@ function readParam(params: Record<string, string | string[] | undefined>, key: s
 }
 
 export default async function SignUpPage({ searchParams }: { searchParams: SearchParams }) {
-  const session = await auth();
-  if (session?.user?.id) {
-    redirect("/");
-  }
-
   const params = await searchParams;
   const errorKey = readParam(params, "error");
   const errorMessage = errorKey ? ERROR_MESSAGES[errorKey] ?? "Unable to create account." : null;
@@ -67,17 +60,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
             if (!createdUserId) {
               redirect("/sign-up?error=username_taken");
             }
-
-            try {
-              await signIn("credentials", { username, password, redirectTo: "/" });
-            } catch (error) {
-              if (error instanceof AuthError) {
-                redirect("/sign-in?error=invalid_credentials");
-              }
-              throw error;
-            }
-
-            redirect("/");
+            redirect("/sign-in?created=1");
           }}
         >
           <label className="mb-2 block text-xs uppercase tracking-[0.12em] text-white/65" htmlFor="username">
