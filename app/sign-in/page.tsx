@@ -22,78 +22,97 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
   const successMessage = createdFlag === "1" ? ERROR_MESSAGES.created : null;
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0b0d12] px-6 py-20 text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(140,160,255,0.2),transparent_40%),radial-gradient(circle_at_80%_10%,rgba(81,153,125,0.16),transparent_35%),radial-gradient(circle_at_50%_85%,rgba(255,255,255,0.08),transparent_45%)]" />
-      <section className="relative w-full max-w-md rounded-2xl border border-white/12 bg-black/35 p-8 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-        <p className="mb-3 inline-flex border border-white/20 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-white/60">The Board v3</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Sign in to your workspace</h1>
-        <p className="mt-2 text-sm text-white/60">Use your username and password to access your private boards and cloud images.</p>
-        {successMessage ? <p className="mt-4 border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">{successMessage}</p> : null}
-        {errorMessage ? <p className="mt-4 border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">{errorMessage}</p> : null}
+    <main className="min-h-screen bg-[#050608] text-white">
+      <div className="flex min-h-screen flex-col lg:flex-row">
+        <section className="relative flex w-full flex-col overflow-hidden border-b border-white/10 bg-[#050608] px-7 pb-10 pt-0 sm:px-10 lg:w-[59.6%] lg:border-b-0 lg:border-r lg:px-8 lg:pb-0 lg:pt-0">
+          <div className="relative order-1 -ml-3 w-full pt-2 sm:-ml-4 lg:-ml-2 lg:pt-3">
+            <p className="font-mono text-[46px] font-normal uppercase tracking-[0em] text-white/55 sm:text-[54px] lg:text-[58px]">THE BOARD</p>
+            <p className="mt-2 font-mono text-[16px] leading-[1.55] tracking-[0em] text-white/55 sm:text-[17px]">
+              Design starts here.
+              <br />
+              Collect. Curate. Create.
+            </p>
+          </div>
+          <p className="order-2 -ml-3 mt-auto pb-5 font-mono text-[14px] tracking-[0em] text-white/55 sm:-ml-4 lg:-ml-2 lg:pb-7">Created by Miguel Leça</p>
+          <div className="relative order-3 -mx-7 mb-0 border-b border-white/10 bg-[#050608] sm:-mx-10 lg:-mx-8">
+            <video className="block h-auto w-full" autoPlay muted loop playsInline>
+              <source src="/videos/the-board-1.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </section>
 
-        <form
-          className="mt-8"
-          action={async (formData) => {
-            "use server";
-            const username = String(formData.get("username") ?? "");
-            const password = String(formData.get("password") ?? "");
+        <section className="flex w-full items-center justify-center bg-[#111317] px-6 py-12 sm:px-8 lg:w-[40.4%] lg:px-12">
+          <div className="w-full max-w-[432px]">
+            <h1 className="text-2xl font-semibold tracking-tight text-white">Welcome back</h1>
+            <p className="mt-2 text-sm text-white/62">Sign in with your username and password.</p>
+            {successMessage ? <p className="mt-4 border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">{successMessage}</p> : null}
+            {errorMessage ? <p className="mt-4 border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">{errorMessage}</p> : null}
 
-            try {
-              await signIn("credentials", {
-                username,
-                password,
-                redirectTo: "/",
-              });
-            } catch (error) {
-              if (error instanceof AuthError) {
-                redirect("/sign-in?error=invalid_credentials");
-              }
-              throw error;
-            }
-          }}
-        >
-          <label className="mb-2 block text-xs uppercase tracking-[0.12em] text-white/65" htmlFor="username">
-            Username
-          </label>
-          <input
-            id="username"
-            name="username"
-            required
-            minLength={3}
-            maxLength={32}
-            pattern="[a-zA-Z0-9_]+"
-            autoComplete="username"
-            className="w-full border border-white/20 bg-black/40 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/40 focus:border-white/40"
-            placeholder="your_username"
-          />
-          <label className="mb-2 mt-4 block text-xs uppercase tracking-[0.12em] text-white/65" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            autoComplete="current-password"
-            className="w-full border border-white/20 bg-black/40 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-white/40 focus:border-white/40"
-            placeholder="••••••••"
-          />
-          <button
-            type="submit"
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:border-white/35 hover:bg-white/15"
-          >
-            Sign in
-          </button>
-        </form>
-        <p className="mt-5 text-center text-sm text-white/70">
-          No account?{" "}
-          <a href="/sign-up" className="text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">
-            Create one
-          </a>
-          .
-        </p>
-      </section>
+            <form
+              className="mt-8"
+              action={async (formData) => {
+                "use server";
+                const username = String(formData.get("username") ?? "");
+                const password = String(formData.get("password") ?? "");
+
+                try {
+                  await signIn("credentials", {
+                    username,
+                    password,
+                    redirectTo: "/",
+                  });
+                } catch (error) {
+                  if (error instanceof AuthError) {
+                    redirect("/sign-in?error=invalid_credentials");
+                  }
+                  throw error;
+                }
+              }}
+            >
+              <label className="mb-2 block text-xs uppercase tracking-[0.12em] text-white/62" htmlFor="username">
+                Username
+              </label>
+              <input
+                id="username"
+                name="username"
+                required
+                minLength={3}
+                maxLength={32}
+                pattern="[a-zA-Z0-9_]+"
+                autoComplete="username"
+                className="w-full border border-white/22 bg-[#0d0f13] px-3 py-2.5 text-sm text-white outline-none ring-0 placeholder:text-white/35 focus:border-white/42"
+                placeholder="your_username"
+              />
+              <label className="mb-2 mt-4 block text-xs uppercase tracking-[0.12em] text-white/62" htmlFor="password">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minLength={8}
+                autoComplete="current-password"
+                className="w-full border border-white/22 bg-[#0d0f13] px-3 py-2.5 text-sm text-white outline-none ring-0 placeholder:text-white/35 focus:border-white/42"
+                placeholder="••••••••"
+              />
+              <button
+                type="submit"
+                className="mt-6 inline-flex w-full items-center justify-center border border-white/26 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:border-white/40 hover:bg-white/16"
+              >
+                Sign in
+              </button>
+            </form>
+            <p className="mt-5 text-center text-sm text-white/70">
+              No account?{" "}
+              <a href="/sign-up" className="text-white underline decoration-white/35 underline-offset-4 hover:decoration-white">
+                Create one
+              </a>
+              .
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
