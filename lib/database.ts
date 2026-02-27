@@ -1,10 +1,22 @@
 import { randomUUID } from "node:crypto";
 import { sql } from "@vercel/postgres";
+import { hashPassword, verifyPassword } from "@/lib/password";
 
 type RawUserRow = {
   id: string;
   email: string;
+  username: string | null;
+  password_hash: string | null;
   name: string | null;
+  avatar_url: string | null;
+};
+
+type RawLocalAuthRow = {
+  id: string;
+  username: string;
+  password_hash: string;
+  name: string | null;
+  email: string;
   avatar_url: string | null;
 };
 
@@ -14,6 +26,18 @@ function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
+function normalizeUsername(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function isValidUsername(value: string) {
+  return /^[a-z0-9_]{3,32}$/.test(value);
+}
+
+function localEmailFromUsername(username: string) {
+  return `${username}@local.invalid`;
+}
+
 export async function ensureSchema() {
   if (!schemaReadyPromise) {
     schemaReadyPromise = (async () => {
@@ -21,11 +45,29 @@ export async function ensureSchema() {
         CREATE TABLE IF NOT EXISTS users (
           id UUID PRIMARY KEY,
           email TEXT UNIQUE NOT NULL,
+          username TEXT,
+          password_hash TEXT,
           auth_provider_user_id TEXT UNIQUE,
           name TEXT,
           avatar_url TEXT,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
+      `;
+
+      await sql`
+        ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS username TEXT
+      `;
+
+      await sql`
+        ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS password_hash TEXT
+      `;
+
+      await sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS users_lower_username_unique
+        ON users (LOWER(username))
+        WHERE username IS NOT NULL
       `;
 
       await sql`
@@ -114,10 +156,64 @@ export async function findUserIdByEmail(email: string) {
   return result.rows[0]?.id ?? null;
 }
 
+export async function createLocalUser(input: { username: string; password: string }) {
+  await ensureSchema();
+
+  const username = normalizeUsername(input.username);
+  const password = input.password;
+  if (!isValidUsername(username)) return null;
+  if (password.length < 8) return null;
+
+  const insertedId = randomUUID();
+  const passwordHash = await hashPassword(password);
+  const email = localEmailFromUsername(username);
+
+  try {
+    const result = await sql<Pick<RawUserRow, "id">>`
+      INSERT INTO users (id, email, username, password_hash, name)
+      VALUES (${insertedId}::uuid, ${email}, ${username}, ${passwordHash}, ${username})
+      RETURNING id
+    `;
+    return result.rows[0]?.id ?? insertedId;
+  } catch (error: unknown) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: string }).code) : null;
+    if (code === "23505") return null;
+    throw error;
+  }
+}
+
+export async function authenticateLocalUser(input: { username: string; password: string }) {
+  await ensureSchema();
+
+  const username = normalizeUsername(input.username);
+  if (!isValidUsername(username) || input.password.length === 0) return null;
+
+  const result = await sql<RawLocalAuthRow>`
+    SELECT id, username, password_hash, name, email, avatar_url
+    FROM users
+    WHERE LOWER(username) = LOWER(${username})
+      AND password_hash IS NOT NULL
+    LIMIT 1
+  `;
+  const row = result.rows[0];
+  if (!row) return null;
+
+  const isValid = await verifyPassword(input.password, row.password_hash);
+  if (!isValid) return null;
+
+  return {
+    id: row.id,
+    username: row.username,
+    name: row.name,
+    email: row.email,
+    image: row.avatar_url,
+  };
+}
+
 export async function getUserById(id: string) {
   await ensureSchema();
   const result = await sql<RawUserRow>`
-    SELECT id, email, name, avatar_url
+    SELECT id, email, username, password_hash, name, avatar_url
     FROM users
     WHERE id = ${id}::uuid
     LIMIT 1

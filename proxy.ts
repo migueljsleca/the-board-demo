@@ -5,10 +5,7 @@ import { getToken } from "next-auth/jwt";
 export default async function middleware(request: NextRequest) {
   const authSecret =
     process.env.AUTH_SECRET ??
-    process.env.NEXTAUTH_SECRET ??
-    process.env.AUTH_GOOGLE_SECRET ??
-    process.env.GOOGLE_CLIENT_SECRET ??
-    process.env.GOOGLE_SECRET;
+    process.env.NEXTAUTH_SECRET;
   const token = await getToken({
     req: request,
     secret: authSecret,
@@ -16,7 +13,7 @@ export default async function middleware(request: NextRequest) {
   const isAuthenticated = Boolean(token?.appUserId ?? token?.sub);
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/sign-in") {
+  if (pathname === "/sign-in" || pathname === "/sign-up") {
     if (isAuthenticated) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -38,5 +35,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/sign-in", "/api/images/:path*", "/api/folders/:path*"],
+  matcher: ["/", "/sign-in", "/sign-up", "/api/images/:path*", "/api/folders/:path*"],
 };

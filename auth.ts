@@ -1,27 +1,34 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import { findUserIdByEmail, upsertAuthUser } from "@/lib/database";
+import Credentials from "next-auth/providers/credentials";
+import { authenticateLocalUser } from "@/lib/database";
 
-const googleClientId =
-  process.env.AUTH_GOOGLE_ID ??
-  process.env.GOOGLE_CLIENT_ID ??
-  process.env.GOOGLE_ID;
-const googleClientSecret =
-  process.env.AUTH_GOOGLE_SECRET ??
-  process.env.GOOGLE_CLIENT_SECRET ??
-  process.env.GOOGLE_SECRET;
-const authSecret =
-  process.env.AUTH_SECRET ??
-  process.env.NEXTAUTH_SECRET ??
-  googleClientSecret;
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   secret: authSecret,
   providers: [
-    Google({
-      clientId: googleClientId ?? "",
-      clientSecret: googleClientSecret ?? "",
+    Credentials({
+      name: "Username and Password",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const username = typeof credentials?.username === "string" ? credentials.username : "";
+        const password = typeof credentials?.password === "string" ? credentials.password : "";
+        if (!username || !password) return null;
+
+        const user = await authenticateLocalUser({ username, password });
+        if (!user) return null;
+
+        return {
+          id: user.id,
+          name: user.name ?? user.username,
+          email: user.email,
+          image: user.image,
+        };
+      },
     }),
   ],
   session: {
@@ -31,32 +38,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/sign-in",
   },
   callbacks: {
-    async jwt({ token, account, profile }) {
-      if (account?.provider === "google") {
-        const email = typeof token.email === "string" ? token.email : typeof profile?.email === "string" ? profile.email : null;
-        if (email) {
-          const userId = await upsertAuthUser({
-            email,
-            name: typeof token.name === "string" ? token.name : typeof profile?.name === "string" ? profile.name : null,
-            image: typeof token.picture === "string" ? token.picture : null,
-            providerUserId: account.providerAccountId,
-          });
-          token.appUserId = userId;
-        }
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.appUserId = user.id;
       }
-
-      if (!token.appUserId && typeof token.email === "string") {
-        const existingUserId = await findUserIdByEmail(token.email);
-        if (existingUserId) {
-          token.appUserId = existingUserId;
-        }
+      if (!token.appUserId && typeof token.sub === "string") {
+        token.appUserId = token.sub;
       }
-
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = typeof token.appUserId === "string" ? token.appUserId : "";
+        session.user.id = typeof token.appUserId === "string" ? token.appUserId : typeof token.sub === "string" ? token.sub : "";
       }
       return session;
     },

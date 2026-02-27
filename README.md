@@ -2,7 +2,7 @@
 
 The Board v3 is a private moodboard app with:
 
-- Google sign-in (Auth.js / NextAuth v5)
+- Username/password sign-in (Auth.js / NextAuth v5 Credentials)
 - Per-user data isolation
 - Cloud image storage in Vercel Blob
 - Metadata in Vercel Postgres-compatible SQL
@@ -13,7 +13,6 @@ The Board v3 is a private moodboard app with:
 - A Vercel project with:
   - Blob enabled
   - Postgres (or Neon connection string compatible with `@vercel/postgres`)
-- Google OAuth credentials
 
 ## Environment Variables
 
@@ -25,14 +24,9 @@ cp .env.example .env.local
 
 Required:
 
-- `AUTH_SECRET` (or `NEXTAUTH_SECRET`; if omitted, app falls back to Google secret but explicit `AUTH_SECRET` is recommended)
-- `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` (also accepts `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` and `GOOGLE_ID` + `GOOGLE_SECRET`)
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`)
 - `POSTGRES_URL` (plus optional related Postgres vars if provided by Vercel)
 - `BLOB_READ_WRITE_TOKEN`
-
-Google OAuth callback URL in Google Cloud Console:
-
-- `https://<your-vercel-domain>/api/auth/callback/google`
 
 ## Install
 
