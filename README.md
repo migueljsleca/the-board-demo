@@ -25,8 +25,8 @@ cp .env.example .env.local
 
 Required:
 
-- `AUTH_SECRET` (or `NEXTAUTH_SECRET`)
-- `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` (or `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`)
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`; if omitted, app falls back to Google secret but explicit `AUTH_SECRET` is recommended)
+- `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` (also accepts `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` and `GOOGLE_ID` + `GOOGLE_SECRET`)
 - `POSTGRES_URL` (plus optional related Postgres vars if provided by Vercel)
 - `BLOB_READ_WRITE_TOKEN`
 

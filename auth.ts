@@ -2,11 +2,21 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { findUserIdByEmail, upsertAuthUser } from "@/lib/database";
 
-const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
-const googleClientId = process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET;
+const googleClientId =
+  process.env.AUTH_GOOGLE_ID ??
+  process.env.GOOGLE_CLIENT_ID ??
+  process.env.GOOGLE_ID;
+const googleClientSecret =
+  process.env.AUTH_GOOGLE_SECRET ??
+  process.env.GOOGLE_CLIENT_SECRET ??
+  process.env.GOOGLE_SECRET;
+const authSecret =
+  process.env.AUTH_SECRET ??
+  process.env.NEXTAUTH_SECRET ??
+  googleClientSecret;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   secret: authSecret,
   providers: [
     Google({
