@@ -1,0 +1,41 @@
+import { redirect } from "next/navigation";
+import { auth, signIn } from "@/auth";
+
+export default async function SignInPage() {
+  const session = await auth();
+  if (session?.user?.id) {
+    redirect("/");
+  }
+
+  return (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0b0d12] px-6 py-20 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(140,160,255,0.2),transparent_40%),radial-gradient(circle_at_80%_10%,rgba(81,153,125,0.16),transparent_35%),radial-gradient(circle_at_50%_85%,rgba(255,255,255,0.08),transparent_45%)]" />
+      <section className="relative w-full max-w-md rounded-2xl border border-white/12 bg-black/35 p-8 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <p className="mb-3 inline-flex border border-white/20 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-white/60">The Board v3</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Sign in to your workspace</h1>
+        <p className="mt-2 text-sm text-white/60">Use your Google account to access your private boards and cloud images.</p>
+
+        <form
+          className="mt-8"
+          action={async () => {
+            "use server";
+            await signIn("google", { redirectTo: "/" });
+          }}
+        >
+          <button
+            type="submit"
+            className="inline-flex w-full items-center justify-center gap-2 border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:border-white/35 hover:bg-white/15"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
+              <path
+                fill="currentColor"
+                d="M21.35 11.1H12v2.98h5.34c-.23 1.5-1.69 4.4-5.34 4.4-3.21 0-5.82-2.65-5.82-5.92s2.61-5.92 5.82-5.92c1.83 0 3.06.78 3.77 1.45l2.57-2.5C16.75 4.11 14.58 3 12 3 7.03 3 3 7.03 3 12s4.03 9 9 9c5.2 0 8.64-3.65 8.64-8.8 0-.59-.07-1.04-.14-1.5Z"
+              />
+            </svg>
+            Continue with Google
+          </button>
+        </form>
+      </section>
+    </main>
+  );
+}

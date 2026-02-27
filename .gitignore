@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/.next.backup-devroot/
 /out/
 
 # production
@@ -39,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local moodboard storage
+/data/
+/public/uploads/
