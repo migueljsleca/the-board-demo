@@ -11,6 +11,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   password_mismatch: "Passwords do not match.",
   username_taken: "That username is already taken.",
   create_failed: "Unable to create account right now.",
+  server_error: "Server configuration is missing. Please check environment variables and try again.",
 };
 
 function readParam(params: Record<string, string | string[] | undefined>, key: string) {
@@ -56,7 +57,13 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
               redirect("/sign-up?error=password_mismatch");
             }
 
-            const createdUserId = await createLocalUser({ username, password });
+            let createdUserId: string | null = null;
+            try {
+              createdUserId = await createLocalUser({ username, password });
+            } catch (error) {
+              console.error("Sign up failed:", error);
+              redirect("/sign-up?error=server_error");
+            }
             if (!createdUserId) {
               redirect("/sign-up?error=username_taken");
             }
