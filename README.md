@@ -25,11 +25,14 @@ cp .env.example .env.local
 
 Required:
 
-- `AUTH_SECRET`
-- `AUTH_GOOGLE_ID`
-- `AUTH_GOOGLE_SECRET`
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`)
+- `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` (or `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET`)
 - `POSTGRES_URL` (plus optional related Postgres vars if provided by Vercel)
 - `BLOB_READ_WRITE_TOKEN`
+
+Google OAuth callback URL in Google Cloud Console:
+
+- `https://<your-vercel-domain>/api/auth/callback/google`
 
 ## Install
 

@@ -2,8 +2,18 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { findUserIdByEmail, upsertAuthUser } from "@/lib/database";
 
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+const googleClientId = process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [Google],
+  secret: authSecret,
+  providers: [
+    Google({
+      clientId: googleClientId ?? "",
+      clientSecret: googleClientSecret ?? "",
+    }),
+  ],
   session: {
     strategy: "jwt",
   },

@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 export default async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   });
   const isAuthenticated = Boolean(token?.appUserId ?? token?.sub);
   const { pathname } = request.nextUrl;
