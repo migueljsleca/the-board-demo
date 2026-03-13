@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getRequestUserId, isNoDatabaseDemoMode } from "@/lib/dev-mode";
 import { createFolder, listBoardData } from "@/lib/image-db";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   const session = await auth();
-  const userId = session?.user?.id;
+  const userId = getRequestUserId(session);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (isNoDatabaseDemoMode()) {
+    return NextResponse.json({ folders: [] });
   }
 
   try {
@@ -21,9 +26,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const session = await auth();
-  const userId = session?.user?.id;
+  const userId = getRequestUserId(session);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (isNoDatabaseDemoMode()) {
+    return NextResponse.json({ error: "Local demo mode is active. Board creation is disabled." }, { status: 503 });
   }
 
   try {

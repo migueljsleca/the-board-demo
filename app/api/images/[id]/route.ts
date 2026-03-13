@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getRequestUserId, isNoDatabaseDemoMode } from "@/lib/dev-mode";
 import { removeImageById, updateImageById } from "@/lib/image-db";
 
 export const runtime = "nodejs";
@@ -10,9 +11,13 @@ type RouteContext = {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   const session = await auth();
-  const userId = session?.user?.id;
+  const userId = getRequestUserId(session);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (isNoDatabaseDemoMode()) {
+    return NextResponse.json({ error: "Local demo mode is active. Image deletion is disabled." }, { status: 503 });
   }
 
   try {
@@ -29,9 +34,13 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   const session = await auth();
-  const userId = session?.user?.id;
+  const userId = getRequestUserId(session);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (isNoDatabaseDemoMode()) {
+    return NextResponse.json({ error: "Local demo mode is active. Image updates are disabled." }, { status: 503 });
   }
 
   try {
