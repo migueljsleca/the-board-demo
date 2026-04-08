@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createLocalUser } from "@/lib/database";
+import { AUTH_HERO_VIDEO_URL } from "@/lib/marketing";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -37,7 +38,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
           <p className="order-2 -ml-3 mt-auto pb-5 font-mono text-[14px] tracking-[0em] text-white/55 sm:-ml-4 lg:-ml-2 lg:pb-7">Created by Miguel Leça</p>
           <div className="relative order-3 -mx-7 mb-0 border-b border-white/10 bg-[#050608] sm:-mx-10 lg:-mx-8">
             <video className="block h-auto w-full" autoPlay muted loop playsInline>
-              <source src="/videos/the-board-1.mp4" type="video/mp4" />
+              <source src={AUTH_HERO_VIDEO_URL} type="video/mp4" />
             </video>
           </div>
         </section>
